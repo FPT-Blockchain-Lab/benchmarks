@@ -2,6 +2,9 @@
 .idea/
 launch.json
 
+# Save reports
+!reports/
+
 # No logs
 *.log
 /log

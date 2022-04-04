@@ -27,14 +27,16 @@ In general the steps are:
 
 For detailed information about using this repo with hyperledger fabric see [Hyperledger Fabric Networks](./networks/fabric/README.md)
 
-## Extending the Documented Reports
-
-The documented reports are built automatically from the `reports` branch of this repository and subsequently hosted on the `gh-pages` branch; pull requests must be target the [`reports` branch](https://github.com/hyperledger/caliper-benchmarks/tree/reports) in order for any modifications to be built.
 
 ```
 npx caliper bind --caliper-bind-sut ethereum:latest --caliper-bind-cwd ./
 
+docker-compose -f ./networks/quorum/1node-clique/docker-compose.yml up -d
+
 npx caliper launch manager --caliper-workspace ./ \
-        --caliper-networkconfig networks/quorum/1node-clique/networkconfig.json \
+        --caliper-networkconfig networks/1node-clique/networkconfig.json \
         --caliper-benchconfig benchmarks/scenario/simple/config.yaml
 ```
+## Extending the Documented Reports
+
+The documented reports are built automatically from the `reports` branch of this repository and subsequently hosted on the `gh-pages` branch; pull requests must be target the [`reports` branch](https://github.com/hyperledger/caliper-benchmarks/tree/reports) in order for any modifications to be built.
