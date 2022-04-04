@@ -1,0 +1,52 @@
+simpleArgs: &simple-args
+  initialMoney: 10000
+  moneyToTransfer: 100
+  numberOfAccounts: &number-of-accounts 1000
+
+test:
+  name: erc20
+  description: >-
+    This is an example benchmark for Caliper, to test the backend DLT's
+    performance with simple account opening & querying transactions.
+  workers:
+    type: local
+    number: 1
+  rounds:
+    - label: mint
+      description: >-
+        Test description for the mint of an account through the deployed
+        contract.
+      txNumber: *number-of-accounts
+      rateControl:
+        type: maximum-rate
+        opts:
+          tps: 300
+          step: 5
+          sampleInterval: 20
+      workload:
+        module: benchmarks/scenario/erc20/mint.js
+        arguments: *simple-args
+    - label: balanceOf
+      description: Test description for the query performance of the deployed contract.
+      txNumber: *number-of-accounts
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 100
+      workload:
+        module: benchmarks/scenario/erc20/balanceOf.js
+        arguments: *simple-args
+    - label: transfer
+      description: Test description for transfering money between accounts.
+      txNumber: *number-of-accounts
+      rateControl:
+        type: maximum-rate
+        opts:
+          tps: 300
+          step: 5
+          sampleInterval: 20
+      workload:
+        module: benchmarks/scenario/erc20/transfer.js
+        arguments:
+          << : *simple-args
+          money: 100
