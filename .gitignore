@@ -16,7 +16,7 @@ launch.json
 .DS_Store
 
 # Limited npm runtime artifacts
-node_modules/*
+**/node_modules
 package-lock.json
 
 **/__pycache__/**

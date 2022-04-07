@@ -1,0 +1,6 @@
+{
+    "dependencies": {
+        "@hyperledger/caliper-core": "^0.4.2",
+        "web3": "^1.2.2"
+    }
+}

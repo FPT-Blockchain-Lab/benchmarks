@@ -1,0 +1,133 @@
+version: "3.6"
+x-quorum-def:
+  &quorum-def
+  restart: "on-failure"
+  image: "${QUORUM_DOCKER_IMAGE:-quorumengineering/quorum:22.1}"
+  expose:
+    - "21000"
+    - "50400"
+  # healthcheck:
+  #   test: ["CMD", "wget", "--spider", "--proxy", "off", "http://localhost:8545"]
+  #   interval: 3s
+  #   timeout: 3s
+  #   retries: 10
+  #   start_period: 5s
+  labels:
+    com.quorum.consensus: clique
+  entrypoint:
+    - /bin/sh
+    - -c
+    - -x
+    - |
+      DDIR=/qdata/data
+      rm -rf $${DDIR}
+      mkdir -p $${DDIR}/keystore
+      mkdir -p $${DDIR}/geth
+      cp /examples/static-nodes.json $${DDIR}/static-nodes.json
+      cp /examples/keys/password /qdata/passwords.txt
+      cp /examples/keys/key$${NODE_ID} $${DDIR}/keystore/key1
+      cp /examples/keys/deployer $${DDIR}/keystore/key2
+
+      touch /var/log/quorum/geth-$$(hostname -i).log
+      chmod 777 /var/log/quorum/geth-$$(hostname -i).log
+      cat /proc/1/fd/2 /proc/1/fd/1 > /var/log/quorum/geth-$$(hostname -i).log &
+
+      geth --datadir $${DDIR} init "/examples/genesis.json"
+      geth \
+        --identity node$${NODE_ID}-clique \
+        --datadir $${DDIR} \
+        --nodiscover \
+        --verbosity 8 \
+        --port 21000 \
+        --syncmode full \
+        --nodekeyhex $${NODE_KEY_HEX} \
+        --unlock 0 --password /qdata/passwords.txt \
+        --allow-insecure-unlock \
+        $${QUORUM_GETH_ARGS:-}
+services:
+  rpc:
+    << : *quorum-def
+    hostname: node1
+    ports:
+      - 8545:8545
+      - 8546:8546
+    volumes:
+      - vol1:/qdata
+      - .:/examples:ro
+      - ./logs:/var/log/quorum/
+    environment:
+      - 'QUORUM_GETH_ARGS=--http --http.addr 0.0.0.0 --http.port 8545 --http.api admin,eth,debug,miner,net,shh,txpool,personal,web3,quorum,clique --ws --ws.addr 0.0.0.0 --ws.port 8546 --ws.api admin,eth,debug,miner,net,shh,txpool,personal,web3,quorum,clique --ws.origins "*"'
+      - NODE_ID=rpc
+      - NODE_KEY_HEX=0e93a540518eeb673d94fb496b746008ab56605463cb9212493997f5755124d1
+    networks:
+      quorum-examples-net:
+        ipv4_address: 172.16.239.10
+  node1:
+    << : *quorum-def
+    hostname: node1
+    volumes:
+      - vol1:/qdata
+      - .:/examples:ro
+      - ./logs:/var/log/quorum/
+    environment:
+      - 'QUORUM_GETH_ARGS=--mine --miner.threads 1'
+      - NODE_ID=1
+      - NODE_KEY_HEX=1be3b50b31734be48452c29d714941ba165ef0cbf3ccea8ca16c45e3d8d45fb0
+    networks:
+      quorum-examples-net:
+        ipv4_address: 172.16.239.11
+  node2:
+    << : *quorum-def
+    hostname: node2
+    volumes:
+      - vol2:/qdata
+      - .:/examples:ro
+      - ./logs:/var/log/quorum/
+    environment:
+      - 'QUORUM_GETH_ARGS=--mine --miner.threads 1'
+      - NODE_ID=2
+      - NODE_KEY_HEX=9bdd6a2e7cc1ca4a4019029df3834d2633ea6e14034d6dcc3b944396fe13a08b
+    networks:
+      quorum-examples-net:
+        ipv4_address: 172.16.239.12
+  node3:
+    << : *quorum-def
+    hostname: node3
+    volumes:
+      - vol3:/qdata
+      - .:/examples:ro
+      - ./logs:/var/log/quorum/
+    environment:
+      - 'QUORUM_GETH_ARGS=--mine --miner.threads 1'
+      - NODE_ID=3
+      - NODE_KEY_HEX=722f11686b2277dcbd72713d8a3c81c666b585c337d47f503c3c1f3c17cf001d
+    networks:
+      quorum-examples-net:
+        ipv4_address: 172.16.239.13
+  node4:
+    << : *quorum-def
+    hostname: node4
+    volumes:
+      - vol4:/qdata
+      - .:/examples:ro
+      - ./logs:/var/log/quorum/
+    environment:
+      - 'QUORUM_GETH_ARGS=--mine --miner.threads 1'
+      - NODE_ID=4
+      - NODE_KEY_HEX=6af685c4de99d44c620ccd9464d19bdeb62a750b9ae49b1740fb28d68a0e5c7d
+    networks:
+      quorum-examples-net:
+        ipv4_address: 172.16.239.14
+networks:
+  quorum-examples-net:
+    name: quorum-examples-net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.239.0/24
+volumes:
+  "vol1":
+  "vol2":
+  "vol3":
+  "vol4":

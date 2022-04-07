@@ -31,11 +31,13 @@ For detailed information about using this repo with hyperledger fabric see [Hype
 ```
 npx caliper bind --caliper-bind-sut ethereum:latest --caliper-bind-cwd ./
 
-docker-compose -f ./networks/quorum/1node-clique/docker-compose.yml up -d
+docker-compose -f ./networks/4node-clique/docker-compose.yml up -d
 
 npx caliper launch manager --caliper-workspace ./ \
-        --caliper-networkconfig networks/1node-clique/networkconfig.json \
-        --caliper-benchconfig benchmarks/scenario/simple/config.yaml
+        --caliper-networkconfig ./networks/4node-clique/networkconfig.json \
+        --caliper-benchconfig ./benchmarks/scenario/simple/config.yaml && \
+mkdir -p ../reports/caliper && \    
+mv report.html ../reports/caliper/4node-clique.html
 ```
 ## Extending the Documented Reports
 
